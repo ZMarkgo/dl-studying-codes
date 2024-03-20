@@ -12,7 +12,10 @@ from keras import models
 from keras import layers
 keras.__version__
 
+# 数据准备：
+# 使用Keras提供的Reuters数据集，该数据集包含许多新闻文本，每个文本被标记为一个主题类别。
 from keras.datasets import reuters
+# 通过reuters.load_data()加载数据，其中num_words=10000参数表示仅保留训练数据中前10000个最常见的单词。
 (train_data, train_labels), (test_data, test_labels) = reuters.load_data(num_words=10000)
 
 len(train_data)
@@ -59,11 +62,16 @@ one_hot_train_labels = to_categorical(train_labels)
 one_hot_test_labels = to_categorical(test_labels)
 
 
+# 模型构建：
+# 使用Sequential模型，顺序地堆叠神经网络层。
+# 神经网络包括三个密集连接（全连接）的层。第一层和第二层都有64个隐藏单元，并使用ReLU作为激活函数。最后一层是输出层，有46个单元，对应46个类别，使用softmax激活函数，用于输出每个类别的概率
 model = models.Sequential()
 model.add(layers.Dense(64, activation='relu', input_shape=(10000,)))
 model.add(layers.Dense(64, activation='relu'))
 model.add(layers.Dense(46, activation='softmax'))
 
+# 编译模型：
+# 使用model.compile()方法编译模型，指定优化器为RMSprop，损失函数为分类交叉熵（categorical_crossentropy），评估指标为准确率（accuracy）。
 model.compile(optimizer='rmsprop',
               loss='categorical_crossentropy',
               metrics=['accuracy'])
@@ -74,6 +82,9 @@ partial_x_train = x_train[1000:]
 y_val = one_hot_train_labels[:1000]
 partial_y_train = one_hot_train_labels[1000:]
 
+# 训练模型：
+# 使用model.fit()方法进行模型训练，传入训练数据和标签，设置epoch数为20，batch_size为512，并指定验证数据。
+# 训练过程中，记录了训练集和验证集的损失和准确率。
 history = model.fit(partial_x_train,
                     partial_y_train,
                     epochs=20,
@@ -139,5 +150,8 @@ predictions[0].shape
 
 np.sum(predictions[0])
 
+# 预测：
+# 使用训练好的模型对测试集进行预测，得到每个样本属于各个类别的概率分布。
+# 通过np.argmax()方法找到概率最大的类别作为预测结果。
 np.argmax(predictions[0])
 
